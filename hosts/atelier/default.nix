@@ -8,14 +8,18 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ../../nix-modules/fonts.nix
+      ../../nix-modules/jp-input.nix
     ];
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = true;
+  boot.loader.grub = {
+    enable = true;
+    device = "/dev/sda";
+    useOSProber = true;
+  };
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "atelier"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -33,12 +37,23 @@
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true;
+  # services.xserver.enable = true;
 
   # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # services.displayManager.sddm.enable = true;
+  # services.desktopManager.plasma6.enable = true;
 
+  # Display Management
+  services.displayManager.sddm = {
+    enable = true;
+    theme = "catppuccin-mocha";
+  };
+
+  # Desktop Environments
+  services.desktopManager.plasma6.enable = true;
+  programs.hyprland.enable = true;
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+ 
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -49,7 +64,7 @@
   services.printing.enable = true;
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -64,6 +79,12 @@
     #media-session.enable = true;
   };
 
+  # Enable Catppuccin for everything
+  catppuccin = {
+    enable = true;
+    flavor = "mocha";
+  };
+
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
@@ -73,13 +94,10 @@
     description = "Andira Rahman";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      kdePackages.kate
+    # kdePackages.kate
     #  thunderbird
     ];
   };
-
-  # Install firefox.
-  programs.firefox.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -88,10 +106,19 @@
   # $ nix search wget
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   environment.systemPackages = with pkgs; [
-    git
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    home-manager
-  #  wget
+     git
+     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+     obsidian
+     home-manager
+     nextcloud-client
+     helix
+  #   (pkgs.catppuccin-sddm.override {
+  #     flavor = "mocha";
+  #   })
+     firefox
+  #   wget
+     libreoffice
+     anki
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -120,5 +147,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
-
 }
