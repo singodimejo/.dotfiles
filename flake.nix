@@ -25,6 +25,20 @@
       modules = [
         catppuccin.nixosModules.catppuccin
   	    ./hosts/atelier
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = "backup";
+
+          home-manager.users.andira = {
+            imports = [
+              ./homes/andira.nix
+              catppuccin.homeModules.catppuccin
+            ];
+            catppuccin.enable = true;
+          };
+        }
       ];
     };
   };

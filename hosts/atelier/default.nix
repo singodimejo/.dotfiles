@@ -10,6 +10,7 @@
       ./hardware-configuration.nix
       ../../nix-modules/fonts.nix
       ../../nix-modules/jp-input.nix
+      # ../../nix-modules/wordpress.nix
     ];
 
   # Bootloader.
@@ -27,7 +28,11 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
-  networking.networkmanager.enable = true;
+  networking.networkmanager = {
+    enable = true;
+  # wifi.backend = "iwd";
+  };
+# networking.wireless.iwd.enable = true;
 
   # Set your time zone.
   time.timeZone = "Asia/Jakarta";
@@ -44,15 +49,22 @@
   # services.desktopManager.plasma6.enable = true;
 
   # Display Management
-  services.displayManager.sddm = {
-    enable = true;
-    theme = "catppuccin-mocha";
-  };
+  services.displayManager.sddm.enable = true;
 
   # Desktop Environments
   services.desktopManager.plasma6.enable = true;
-  programs.hyprland.enable = true;
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  programs.hyprland = {
+    enable = true;
+    withUWSM = true;
+  };
+  environment.sessionVariables = {
+    XDG_SESSION_TYPE = "wayland";
+    NIXOS_OZONE_WL = "1";
+    MOZ_ENABLE_WAYLAND = "1";
+  };
+  # Tablet Driver
+  # hardware.opentabletdriver.enable = true;
+  programs.xppen.enable = true;
  
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -79,6 +91,24 @@
     #media-session.enable = true;
   };
 
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    xdgOpenUsePortal = true;
+    config = {
+      kde.default = [ "kde" "gtk" "*" ];
+    };
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-gtk
+      kdePackages.xdg-desktop-portal-kde
+      xdg-desktop-portal-hyprland
+    ];
+  };
+
+  # Enable Bluetooth
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+
   # Enable Catppuccin for everything
   catppuccin = {
     enable = true;
@@ -94,8 +124,8 @@
     description = "Andira Rahman";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-    # kdePackages.kate
-    #  thunderbird
+      # kdePackages.kate
+      # thunderbird
     ];
   };
 
@@ -108,10 +138,9 @@
   environment.systemPackages = with pkgs; [
      git
      vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-     obsidian
+  #  obsidian
      home-manager
      nextcloud-client
-     helix
   #   (pkgs.catppuccin-sddm.override {
   #     flavor = "mocha";
   #   })
@@ -119,6 +148,11 @@
   #   wget
      libreoffice
      anki
+  #  wp-cli
+     gimp3
+     kdePackages.xdg-desktop-portal-kde
+     wl-clipboard
+     brightnessctl
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -134,6 +168,8 @@
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
+  services.usbmuxd.enable = true;
+  
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
