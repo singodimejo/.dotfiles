@@ -25,8 +25,12 @@
     delve
     otpclient
     krita
+    inkscape-with-extensions
     wev
     evtest
+    whois
+    dig
+    dust
 
     # TUIs
     bluetui
@@ -41,6 +45,12 @@
     biome    
   ];
 
+  home.sessionVariables = {
+    QT_AUTO_SCREEN_SCALE_FACTOR = 1;
+    QT_QPA_PLATFORM = "wayland;xcb";
+    QT_WAYLAND_DISABLE_WINDOWDECORATION=1;
+  };
+
   programs = {
     bat.enable = true;
     fzf.enable = true;
@@ -53,6 +63,8 @@
     ripgrep.enable = true;
     ripgrep-all.enable = true;
     gitui.enable = true;
+    hyprshot.enable = true;
+    rmpc.enable = true;
 
     # Process Managers
     btop.enable = true;
@@ -126,6 +138,10 @@
     dunst.enable = true;
     awww.enable = true;
     podman.enable = true;
+    mpd = {
+      enable = true;
+      musicDirectory = /home/andira/Music;
+    };
   };
   
   home.stateVersion = "25.05";
