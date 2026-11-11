@@ -8,7 +8,7 @@
 
   imports = [
     ../home-modules/widgets/waybar.nix
-    ../home-modules/wm/hyprland.nix
+    ../home-modules/wm/hyprland
   ];
 
   home.packages = with pkgs; [
