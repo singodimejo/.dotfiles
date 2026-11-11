@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  wlctl,
   ...
 }: {
   home.username = "andira";
@@ -12,42 +13,59 @@
   ];
 
   home.packages = with pkgs; [
-    podman-compose
-    wp-cli
-    pnpm
-    htop
-    microfetch
     p7zip
     vlc
-    # obsidian
-    gajim
-    gopls
-    delve
     otpclient
-    krita
-    inkscape-with-extensions
+    stirling-pdf-desktop
+
+    # Messenger
+    gajim
+    telegram-desktop
+
+    # Programming tools
+    delve
+    pnpm
+    wp-cli
+    podman-compose
+    nodejs_26
+    
+    # Debug and monitoring tools
     wev
     evtest
     whois
     dig
     dust
+    htop
+    microfetch
 
+    # Drawing    
+    gimp
+    krita
+    inkscape-with-extensions
+    
     # TUIs
     bluetui
     wiremix
+    wlctl.packages.${pkgs.stdenv.hostPlatform.system}.default
     # impala
 
     # Language Servers
     nil
+    gopls
     markdown-oxide
     svelte-language-server
     intelephense
     biome    
+
+    # AI Harness
+    deepseek-harness
+    bubblewrap
   ];
 
   home.sessionVariables = {
     QT_AUTO_SCREEN_SCALE_FACTOR = 1;
     QT_QPA_PLATFORM = "wayland;xcb";
+    QT_QPA_PLATFORMTHEME = "kde";
     QT_WAYLAND_DISABLE_WINDOWDECORATION=1;
   };
 
@@ -55,7 +73,6 @@
     bat.enable = true;
     fzf.enable = true;
     rofi.enable = true;
-    nushell.enable = true;
     tmux.enable = true;
     gpg.enable = true;
     obsidian.enable = true;
@@ -65,6 +82,21 @@
     gitui.enable = true;
     hyprshot.enable = true;
     rmpc.enable = true;
+    anki.enable = true;
+    # opencode.enable = true;
+    herdr.enable = true;
+
+    nushell = {
+      enable = true;
+      loadSessionVariables = true;
+    };
+
+    zellij= {
+      enable = true;
+      settings = {
+        default_shell = "zsh";
+      };
+    };
 
     # Process Managers
     btop.enable = true;
@@ -119,7 +151,7 @@
     kitty = {
       enable = true;
       font = {
-        size = 12;
+        size = 16;
         name = "FiraCode Nerd Font Mono";
       };  
       settings.shell = "${pkgs.zsh}/bin/zsh";
@@ -138,11 +170,46 @@
     dunst.enable = true;
     awww.enable = true;
     podman.enable = true;
+    nextcloud-client.enable = true;
     mpd = {
       enable = true;
       musicDirectory = /home/andira/Music;
     };
+    clipcat = {
+      enable = true;
+      menuSettings = {
+        server_endpoint = "/run/user/1000/clipcat/grpc.sock";
+        finder = "rofi";
+        rofi = {
+          line_length = 100;
+          menu_length = 30;
+          menu_prompt = "Clipcat";
+          extra_arguments = [
+            "-mesg"
+            "Please select a clip"
+          ];
+        };
+      };
+    };
   };
-  
+
+  # The awww daemon is managed by services.awww; this applies the wallpaper
+  # once the daemon is up (and again whenever the graphical session restarts).
+  systemd.user.services.awww-wallpaper = {
+    Unit = {
+      Description = "Set awww wallpaper";
+      ConditionEnvironment = "WAYLAND_DISPLAY";
+      Requires = [ "awww.service" ];
+      After = [ "awww.service" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.awww}/bin/awww img ${config.home.homeDirectory}/Pictures/Backgrounds/wallhaven-solar-system.png";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   home.stateVersion = "25.05";
 }
