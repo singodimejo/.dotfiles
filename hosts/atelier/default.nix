@@ -1,6 +1,6 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# and in the NixOS manual (accessible by running 'nixos-help’).
 
 { config, pkgs, ... }:
 
@@ -10,7 +10,6 @@
       ./hardware-configuration.nix
       ../../nix-modules/fonts.nix
       ../../nix-modules/jp-input.nix
-      # ../../nix-modules/wordpress.nix
     ];
 
   # Bootloader.
@@ -39,6 +38,9 @@
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_TIME = "en_DK.UTF-8";
+  };
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
@@ -55,16 +57,18 @@
   services.desktopManager.plasma6.enable = true;
   programs.hyprland = {
     enable = true;
-    withUWSM = true;
   };
   environment.sessionVariables = {
-    XDG_SESSION_TYPE = "wayland";
     NIXOS_OZONE_WL = "1";
     MOZ_ENABLE_WAYLAND = "1";
   };
+
   # Tablet Driver
   # hardware.opentabletdriver.enable = true;
   programs.xppen.enable = true;
+
+  # Keyboard config
+  hardware.keyboard.qmk.enable = true;
  
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -86,17 +90,15 @@
     # If you want to use JACK applications, uncomment this
     #jack.enable = true;
 
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
+    wireplumber.enable = true;
   };
 
   xdg.portal = {
     enable = true;
-    wlr.enable = true;
     xdgOpenUsePortal = true;
     config = {
       kde.default = [ "kde" "gtk" "*" ];
+      hyprland.default = [ "hyprland" "gtk" ];
     };
     extraPortals = with pkgs; [
       xdg-desktop-portal-gtk
@@ -112,17 +114,21 @@
   # Enable Catppuccin for everything
   catppuccin = {
     enable = true;
+    autoEnable = true;
     flavor = "mocha";
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  programs.zsh.enable = true;
+
+  # Define a user account. Don't forget to set a password with 'passwd’.
   users.users.andira = {
     isNormalUser = true;
     description = "Andira Rahman";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
+    shell = pkgs.zsh;
     packages = with pkgs; [
       # kdePackages.kate
       # thunderbird
@@ -138,21 +144,22 @@
   environment.systemPackages = with pkgs; [
      git
      vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  obsidian
+     # obsidian
      home-manager
-     nextcloud-client
-  #   (pkgs.catppuccin-sddm.override {
-  #     flavor = "mocha";
-  #   })
+     # nextcloud-client
+     # (pkgs.catppuccin-sddm.override {
+     #   flavor = "mocha";
+     # })
      firefox
-  #   wget
+     # wget
      libreoffice
-     anki
-  #  wp-cli
-     gimp3
-     kdePackages.xdg-desktop-portal-kde
-     wl-clipboard
+     # anki
+     # wp-cli
+     # gimp3
+      wl-clipboard
      brightnessctl
+     via
+     qmk
   ];
 
   programs.steam.enable = true;
@@ -171,6 +178,11 @@
   # services.openssh.enable = true;
 
   services.usbmuxd.enable = true;
+  services.udev.packages = [
+    pkgs.via
+    pkgs.qmk-udev-rules
+    pkgs.brightnessctl
+  ];
   
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -180,9 +192,9 @@
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # on your system were taken. It's perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "25.05"; # Did you read the comment?
 }
